@@ -82,12 +82,19 @@ app.post('/api/create-subscription', async (req, res) => {
         }
 
         // Plan IDs for subscriptions
-        const priceId = planId === '100_credits' ? 'price_1PxO48GI6vk81n8VDNbPRDUv' : 'price_1PxOY5GI6vk81n8VHEdhYfwI';
+        let priceId;
+        if (planId === '100_credits') {
+            priceId = 'price_1PxO48GI6vk81n8VDNbPRDUv';
+        } else if (planId === '1000_credits') {
+            priceId = 'price_1PxOY5GI6vk81n8VHEdhYfwI';
+        } else if (planId === '20000_credits') {
+            priceId = 'price_1PxW4wGI6vk81n8VOVrsM7oY'; // Annual plan
+        }
 
         // Create the subscription
         const subscription = await stripe.subscriptions.create({
             customer: customer.id,
-            items: [{ price: priceId }], // Pass the Price ID of either $10 or $27 subscription
+            items: [{ price: priceId }],
             expand: ['latest_invoice.payment_intent'],
         });
 
@@ -107,11 +114,11 @@ app.post('/api/purchase-credits', async (req, res) => {
     // Set Stripe price ID based on selected credits
     let priceId;
     if (creditAmount === 30) {
-        priceId = 'price_1PxOOWGI6vk81n8VhTmVwBs'; // Actual Price ID for 30 credits
+        priceId = 'price_1PxOOWGI6vk81n8VhTmVwBs'; // Price ID for 30 credits
     } else if (creditAmount === 70) {
-        priceId = 'price_1PxOP3GI6vk81n8V5MA34kv'; // Actual Price ID for 70 credits
+        priceId = 'price_1PxOP3GI6vk81n8V5MA34kv'; // Price ID for 70 credits
     } else if (creditAmount === 5000) {
-        priceId = 'price_1PxOPqGI6vk81n8V9o09e41'; // Actual Price ID for 5000 credits
+        priceId = 'price_1PxOPqGI6vk81n8V9o09e41'; // Price ID for 5000 credits
     }
 
     try {
@@ -131,7 +138,7 @@ app.post('/api/purchase-credits', async (req, res) => {
 
         // Create a payment intent for purchasing extra credits
         const paymentIntent = await stripe.paymentIntents.create({
-            amount: priceId, // Amount to be charged based on selected priceId
+            amount: priceId, // The correct amount for selected credits
             currency: 'usd',
             payment_method: paymentMethodId,
             confirmation_method: 'manual',
@@ -172,3 +179,4 @@ app.post('/api/reset-credits', async (req, res) => {
 // Start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
