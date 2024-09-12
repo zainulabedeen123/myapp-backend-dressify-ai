@@ -7,14 +7,21 @@ require('dotenv').config();
 
 // Initialize Express App
 const app = express();
-app.use(cors());
+
+// Configure CORS to allow requests from your frontend domain
+app.use(cors({
+    origin: ['http://dressify-ai.com', 'https://dressify-ai.com'], // Add both HTTP and HTTPS versions of your domain
+    methods: ['GET', 'POST'],
+    credentials: true,
+}));
+
 app.use(bodyParser.json());
 
 // Initialize Stripe
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 // MongoDB Connection String from MongoDB Atlas
-const mongoURI = 'mongodb+srv://zainulabedeen188:RPyTw7b36PRB2bnn@dressifytechaistylist.ntphv.mongodb.net/?retryWrites=true&w=majority&appName=DressifyTechAIStylist';
+const mongoURI = process.env.MONGODB_URI; // Use the environment variable for security
 
 mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('MongoDB Connected'))
@@ -179,4 +186,3 @@ app.post('/api/reset-credits', async (req, res) => {
 // Start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
